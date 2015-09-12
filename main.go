@@ -7,10 +7,11 @@ import (
 )
 
 var token string
+var latlon string
 
 func init() {
-	flag.StringVar(&token, "token", "", "Token for Weather.com API")
-	flag.Parse()
+	flag.StringVar(&latlon, "l", "", "Latitude,Longitude")
+	flag.StringVar(&token, "t", "", "Token for Weather.com API")
 }
 
 func checkError(err error) {
@@ -21,9 +22,20 @@ func checkError(err error) {
 }
 
 func main() {
+	flag.Parse()
+
+	if token == "" {
+		fmt.Fprintf(os.Stderr, "Missing -token")
+		os.Exit(1)
+	}
+
 	wa := newWeatherApi(token)
 
-	gl, err := wa.getGeoLookup()
+	loc := "autoip"
+	if latlon != "" {
+		loc = latlon
+	}
+	gl, err := wa.getGeoLookup(loc)
 	checkError(err)
 
 	hd, err := wa.getHourly(gl)
@@ -31,7 +43,11 @@ func main() {
 
 	fmt.Printf("%v (%v)\n", gl.Location.City, gl.Location.Country)
 	for _, h := range hd.HourlyForecast {
-		fmt.Printf("%2d: ", h.FCTTIME.getTime().Hour())
+		hour := h.FCTTIME.getTime().Hour()
+		if hour == 0 {
+			fmt.Println("========")
+		}
+		fmt.Printf("%2d: ", hour)
 		for i := int32(0); i < (h.Pop/10)+1; i++ {
 			fmt.Print("|")
 		}

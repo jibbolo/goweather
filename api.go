@@ -11,7 +11,7 @@ import (
 
 const (
 	baseUrl     string = "http://api.wunderground.com/api/%s%%s"
-	geoLookupEP string = "/geolookup/q/autoip.json"
+	geoLookupEP string = "/geolookup/q/%s.json"
 	hourlyEP    string = "/hourly%s.json"
 )
 
@@ -23,8 +23,8 @@ func newWeatherApi(token string) *weatherApi {
 	return &weatherApi{token}
 }
 
-func (wa *weatherApi) getGeoLookup() (*geoLookup, error) {
-	res, err := wa.getEndpoint(geoLookupEP)
+func (wa *weatherApi) getGeoLookup(q string) (*geoLookup, error) {
+	res, err := wa.getEndpoint(geoLookupEP, q)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (wa *weatherApi) getGeoLookup() (*geoLookup, error) {
 		return nil, err
 	}
 	if gl.Location.L == "" {
-		return nil, fmt.Errorf("unknown location")
+		return nil, fmt.Errorf("unknown location: %s", q)
 	}
 	return gl, nil
 }
