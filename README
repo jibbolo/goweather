@@ -1,2 +1,3 @@
 GoWeather fetch current day weather information from weather.com
 
+./goweather -t <weather_com_token> [-l <latitude>,<longitude>]
